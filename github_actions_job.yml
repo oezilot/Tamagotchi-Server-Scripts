@@ -1,0 +1,28 @@
+name: Sync-Script auf dem Tamagotchi-Server ausführen
+
+on:
+  push:
+    branches:
+      - tamagotchi-server  # Hier gibst du den Branch an, auf den der Push ausgeführt wird
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest  # Der Runner (Ubuntu wird hier als Beispiel verwendet)
+
+    steps:
+      # Schritt 1: Repository auschecken
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Schritt 2: SSH-Schlüssel einrichten und Server authentifizieren
+      - name: SSH-Schlüssel einrichten
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY_PRIVATE_TAMAGOTCHI }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H 195.234.163.110 >> ~/.ssh/known_hosts
+
+      # Schritt 3: Auf dem Server einloggen und Skript ausführen
+      - name: SSH und Skript ausführen
+        run: |
+          ssh -i ~/.ssh/id_rsa zvowevan@195.234.163.110 "cd /home/zvowevan/Projects/Webhook-Server && ./git_sync_freundschaftsbuch.sh"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Log den Empfang des Webhooks
+echo "Webhook empfangen: $(date)" >> /home/zvowevan/webhook.log
+
+# Wechsle ins Projektverzeichnis
+cd /home/zvowevan/Projects/Freundschaftsbuch || exit 1
+
+# Pull die Änderungen vom Branch tamagotchi-server
+git pull origin tamagotchi-server >> /home/zvowevan/webhook.log 2>&1
+
+# Neustart des Dienstes
+sudo systemctl restart freundschaftsbuch.service >> /home/zvowevan/webhook.log 2>&1
+
+# Logge den Abschluss
+echo "Deployment abgeschlossen: $(date)" >> /home/zvowevan/webhook.log

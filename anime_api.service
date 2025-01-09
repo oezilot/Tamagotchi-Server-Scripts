@@ -1,0 +1,13 @@
+[Unit]
+Description=Gunicorn instance to serve Anime API
+After=network.target
+
+[Service]
+User=zvowevan
+WorkingDirectory=/home/zvowevan/Projects/Anime_API
+ExecStart=/home/zvowevan/Projects/Anime_API/venv/bin/gunicorn --bind 127.0.0.1:5000 selber:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

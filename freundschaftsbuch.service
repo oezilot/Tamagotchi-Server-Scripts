@@ -1,0 +1,14 @@
+[Unit]
+Description=Freundschaftsbuch Flask Application
+After=network.target
+
+[Service]
+User=zvowevan
+Group=zvowevan
+WorkingDirectory=/home/zvowevan/Projects/Freundschaftsbuch
+ExecStart=/bin/bash -c "/home/zvowevan/Projects/Freundschaftsbuch/venv/bin/gunicorn --bind 127.0.0.1:8000 app:app & /usr/bin/python3 /home/zvowevan/Projects/Freundschaftsbuch/backup_script.py"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
