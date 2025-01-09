@@ -11,7 +11,11 @@ Dieses Repository enthält alle Skripte, die für die Verwaltung und Einrichtung
 ## Verwendung
 
 Service-Files --> /etc/systemd/system/name_der_app.service
+\n
 Nginx-Config-Files --> /etc/nginx/name_der_app
+\n
 Github Actions Script --> /projektordner/.github/workflows
+\n
 Backup-Script --> /projektordner/backup_sctipt.py
+\n
 Automatic-Push-Script (arbeitet mit Github Actions zusammen) --> ./webhook/webhook.sh
