@@ -62,8 +62,21 @@ Den Server für die Installation eines Betriebssystems vorbereiten.
    - Batterie prüfen und bei Bedarf ersetzen (Signalbereich prüfen: grün = gut).
 
 2. Netzwerk-Interfaces identifizieren:
-   - Führe den Befehl ip addr show aus, um die aktiven Ethernet-Anschlüsse zu finden.
-   - Ein aktiver Anschluss wird als "UP" angezeigt. Merke dir den Namen des Interfaces! (den bracht man später für der Netzwerkkonfiguration)
+   - Falls der Server mehrere Ethernetnaschlüse besitzt dann stecke ein Ethernetkabel in eines der Ethernetanschlüsse und führe folgenden Cammand aus:
+   ```bash
+   ip addr show
+   ```
+   - Nun werden alle aktiven und inaktiven Anschlüsse gezeigt. Ein aktiver Anschluss wird als "UP" angezeigt. Merke dir den Namen des Interfaces für später! (hier: enp9s0)
+   ```bash
+   3: enp9s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    link/ether 00:27:13:54:0b:db brd ff:ff:ff:ff:ff:ff
+    inet 195.234.163.110/26 brd 195.234.163.127 scope global enp9s0
+       valid_lft forever preferred_lft forever
+    inet6 fda8:b2ef:f20b:ca46:227:13ff:fe54:bdb/64 scope global dynamic mngtmpaddr noprefixroute 
+       valid_lft 1655sec preferred_lft 1655sec
+    inet6 fe80::227:13ff:fe54:bdb/64 scope link 
+       valid_lft forever preferred_lft forever
+   ```
 
 ---
 
