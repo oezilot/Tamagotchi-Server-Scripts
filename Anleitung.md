@@ -22,12 +22,12 @@
     - [Ziel](#ziel-3)
     - [Zutaten](#zutaten-3)
     - [Arbeitsschritte](#arbeitsschritte-3)
+  - [Service-Konfiguration (Gunicorn)](#service-konfiguration-gunicorn)
     - [Nginx-Konfiguration](#nginx-konfiguration)
     - [Statische Webseiten](#statische-webseiten)
     - [Dynamische Webseiten](#dynamische-webseiten)
     - [Domainnamen (DNS-Verbindung)](#domainnamen-dns-verbindung)
     - [SSL Zertifikate (HTTPS einrichten)](#ssl-zertifikate-https-einrichten)
-  - [Service-Konfiguration (Gunicorn)](#service-konfiguration-gunicorn)
   - [Datenbank-Backups](#datenbank-backups)
     - [Ziel](#ziel-4)
     - [Arbeitsschritte](#arbeitsschritte-4)
@@ -232,10 +232,44 @@ Webseiten auf den Server abspeichern und laden, die über einen Browser zugängl
 - gunicorn (als Systemd-Service)
 
 ### Arbeitsschritte
-1. Richte nginx für statische und dynamische Webseiten ein.
-2. Konfiguriere Services für dynamische Applikationen.
-3. Verbinde Domainnamen mit der Server-IP.
-4. Stelle SSL-Zertifikate bereit.
+1. Websiten hosten (statische files ablegen und dynamische websites services einrichten)
+2. HTTP-Verkehr einrichten und website die gehostet sind auf den server an die öffentlichkeit bringen.
+3. Domainnamen.
+4. SSL-Zertifikate.
+
+---
+## Service-Konfiguration (Gunicorn)
+- das wird nur bei dynamischen website benötigt und sorgt dafür dass die applikation ständig läuft auf dem server und dann auch stängig http(s)-requests entgegen nehmen und beantworten kann!
+- wenn man mehrere website-services hat muss man achten dass jede applikation zwar auf dem localhost läuft aber jeweils auf einem anderen port!
+- hier gehe ich von einer python flak applikation auf mit gunicorn im venv installiert!
+
+1. zuerst solltes du tsten ob die app mit gunicorn funktiniert! aktiviere das venv und Starte die App mit Gunicorn, unter localhost:8000 soltest du nun im browser darauf zugreifen können!: merke dir diesen command!
+   ```bash
+   gunicorn --workers 3 --bind 0.0.0.0:8000 python_filename_ohne_pyendung:app_name
+   ```
+2. wenn das funktioniert hat dann richte den systemd-servcice ein mit der selber zeile die augferufen wird wenn man den service startet! (ersetze `app_name` mit irgendeinem passenden namen für deine app)
+   ```bash
+   sudo nano /etc/systemd/system/app_name.service
+   ```
+3. Ändere folgende Punkte:
+- descritpion -> passend für deine website
+- user -> bei welchem user der service gehostet?
+- workingdirectory -> pfad zum projektordner (absolouter pfad!)
+- execstart -> der command der die application vorher zum runen bringt mithilfe von gunicorn! hier ersetze `0.0.0.0` mit dem `127.0.0.1` und ersetze `gunicorn` mit dem pfad zum gunicorn executable im venv des projekts!
+
+4. ctrl. + o, dann enter, dann ctrl. + x (speicher und exit)
+
+5. daemon reloaden und den service starten und status überprüfen:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl start servicename.service
+   sudo systemctl status servicename.service
+   ```
+6. wenn der service problemlos läuft dan enable ihn:
+   ```bash
+   sudo systemctl enable servicename.service
+   ```
+7. nun kannst du in einem nächsten schritt die website erreichbar machen mit nginx!
 
 ---
 
@@ -286,39 +320,52 @@ Für jede Website braucht es eine nginx-Konfiguration die http(s)-Requests und R
 1. Es gibt 2 Möglicheiten um die html-files einer dynamischen Application abuzulegen. Hier erkläre ich nur die Version B weil die besser ist in meinen Augen! Lege deshalb also die files des projekts we normal in `~/Projects/Projektname` ab und nicht im `/var/www/html`!
    - A: man definiert jeden endpunkt (template) der application in nginx und lässt nginx die verschiedenen url-parameter handlen (hier sagt die applikation dem nginx dass es file x dem browser schicken sollte und nginx holt es dann und schickt es zum brwser)
    - B: man definiert nur die ganze website als solches im nginx und lässt die applikation selbrer das url-parameter handlen. (hier schickt die applikation das file zu nginx wodurch nginx dies gleich weiterleiten kann zum brwser)
-2. Folgende anpassungen sind zu treffen oder zu beachten im Konfigurationsfile!
+2. Erstelle eine Konfigurationsdatei, für jede Applikation eine seperate datei! Ersetze `static_nginc_config` mit deinem gewünschten Namen für die Datei:
+   ```bash
+   sudo nano /etc/nginx/sites-available/staic_nginx_config
+   ```
+3. Folgende anpassungen sind zu treffen oder zu beachten im Konfigurationsfile!
    - `server_name _` `listen id-adresse:portnummer`-> wenn man keine domain hat muss man einen anderen port nutzen des nginx-servers um die verschiedenen websiten zu unterscxheiden (nicht empfohlen und nur vorübergehend einzusetzen!!!) jede dynamische applikation muss seine eigene domaine oder subdomaine haben! 
    - `location /` -> alle url-parameter werden zu  applikation weitergleitet (version B)
-   - `proxy_pass http://127.0.0.1:5000/` -> leitet http-request zu dem service der auf pot 5000 läuft auf dem localhost weiter denn dort läuft die applikation! es werden alle request mit url-parameter x weitergeleitet (wenn z.b. `http://127.0.0.1:5000/login` stehen würde würde nur alle requests mit dem login-parameter an die applikation weitergeleitet werden!)
-3. 
+   - `proxy_pass http://127.0.0.1:5000/` -> leitet http-request zu dem service der auf pot 5000 läuft auf dem localhost weiter denn dort läuft die applikation! es werden alle request mit url-parameter x weitergeleitet (wenn z.b. `http://127.0.0.1:5000/login` stehen würde würde nur alle requests mit dem login-parameter an die applikation weitergeleitet werden!). die restlichen proxy-sachen einfach übernehmen vom beispel-file von github!
+4. Die website sollte nun auf folgendem url-erreichbar sein: http://ip-adresse:portnummer (nur wenn bereits ein service exitiert natürlich!!!)
 ---
 
 ### Domainnamen (DNS-Verbindung)
-1. Kaufe eine Domain (z. B. bei GoDaddy).
-2. Richte DNS-Records ein, um Domains mit dem Server zu verbinden.
+1. Kaufe eine Domain (z.b. bei GoDaddy, Cloudflare etc).
+2. Richte DNS-Records ein, um Domains mit dem Server zu verbinden. Einen record für den server selber und einen record für jede dynamische website die ihre eigene subdomain benötigt! (hier: ip-adresse-server = flumini.ch, anime-website = anisearch.flumini.ch) (mache das auf der website oder mit dem api der website, ahtung: wenn man es mit der api des dns-servers machen will dann ict godaddy nicht geeignet weil man keine recht hat, migriere in diesem fall die damäne zu cloudflare und wechlse die dns-servers). (godaddy: https://dcc.godaddy.com/control/portfolio/flumini.ch/settings?tab=dns&itc=mya_vh_buildwebsite_domain)
+   ![Alt-Text](images/record_gd.png){width=600px}
+3. hinterlege die domainnamen im nginx-konfigfile auf der zeile `servername`
+   ```bash
+   # /etc/nginx/sites-available/staic_nginx_config
+   server_name flumini.ch
 
+   # dynamische website
+   server_name anisearch.flumini.ch;
+   ```
 ---
 
 ### SSL Zertifikate (HTTPS einrichten)
+- folgende anleitung hat mir den arsch gerettet: https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-22-04#step-3-allowing-https-through-the-firewall
+
 1. Installiere Certbot:
-   
+   ```bash
    sudo apt install certbot
-   
-2. Hole ein Zertifikat:
-   
+   ```
+2. ändere die firewall konfiguration sodass sie nun auch https-request annimmt und nicht nur http!
+   ```bash
+   sudo ufw allow 'Nginx Full'
+   sudo ufw delete allow 'Nginx HTTP'
+   ``` 
+3. Hole ein Zertifikat für deine domain: (dieser command fügt dann dein zertifikat-links direkt in deine nginx-konfigurationsdatei ein, für das muss aber die domain bereits in der nginx-konfiguration stehen!)
+   ```bash
    sudo certbot --nginx -d yourdomain.com
-   
-3. Konfiguriere automatisches Erneuern der Zertifikate.
+   ```
 
----
-
-## Service-Konfiguration (Gunicorn)
-1. Klone das Repository und installiere die Abhängigkeiten.
-2. Starte die App mit Gunicorn:
-   
-   gunicorn --workers 3 --bind 0.0.0.0:8000 app:app
-   
-3. Richte einen Systemd-Service für Gunicorn ein.
+4. Konfiguriere automatisches Erneuern der Zertifikate.
+   ```bash
+   sudo systemctl status snap.certbot.renew.service
+   ```
 
 ---
 
