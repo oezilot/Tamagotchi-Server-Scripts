@@ -31,17 +31,13 @@
   - [Datenbank-Backups](#datenbank-backups)
     - [Ziel](#ziel-4)
     - [Arbeitsschritte](#arbeitsschritte-4)
-  - [Mail-Server (Sendmail)](#mail-server-sendmail)
-    - [Ziel](#ziel-5)
   - [Automatisierte Git-Pull-Action](#automatisierte-git-pull-action)
-    - [Ziel](#ziel-6)
+    - [Ziel](#ziel-5)
     - [Arbeitsschritte](#arbeitsschritte-5)
   - [Debugging](#debugging)
   - [Zusammenfassung](#zusammenfassung)
   - [Theorie](#theorie)
   - [Links](#links)
-  - [Fragen](#fragen)
-  - [To Do](#to-do)
 
 ---
 
@@ -380,13 +376,6 @@ Automatisierte Backups der Datenbank erstellen.
 
 ---
 
-## Mail-Server (Sendmail)
-
-### Ziel
-Einen Mail-Server einrichten (z. B. mit Sendmail).
-
----
-
 ## Automatisierte Git-Pull-Action
 
 ### Ziel
@@ -398,23 +387,19 @@ Automatische Synchronisation bei Pushes auf den Deployment-Branch.
 
 ---
 ## Debugging
-- Überprüfe Firewalls und laufende Services.
-- Stelle sicher, dass alle notwendigen Ports geöffnet sind (z. B. 80, 443 für HTTP/HTTPS, 22 für SSH).
+- Überprüfe Firewalls und laufende Services und stelle sicher, dass alle notwendigen Ports geöffnet sind (z. B. 80, 443 für HTTP/HTTPS, 22 für SSH).
 - Prüfe die Logs der Services:
-  
+  ```bash
   sudo journalctl -u <service-name>
-  
-- Teste die Konnektivität zwischen Geräten mit ping und telnet.
-- Stelle sicher, dass die Systemressourcen ausreichend sind (RAM, CPU, Speicherplatz).
+  ```
+- Prüfe ob die services laufen (ist service enabled?):
+  ```bash
+  sudo systemctl <service-name>
+  ```
 - Überprüfe die Syntax und Integrität von Konfigurationsdateien, z. B. für nginx:
-  
+  ```bash
   sudo nginx -t
-  
-- Nutze Debugging-Werkzeuge wie strace, tcpdump oder netstat, um detaillierte Einblicke in Probleme zu erhalten.
-- Überprüfe, ob die Dienste korrekt gestartet sind und im Hintergrund laufen:
-  
-  sudo systemctl status <service-name>
-  
+  ```
 
 ---
 
@@ -427,7 +412,6 @@ Automatische Synchronisation bei Pushes auf den Deployment-Branch.
 ---
 
 ## Theorie
-- Details zu RAID1, SSH, DNS und SSL/TLS.
 
 ---
 
@@ -436,14 +420,4 @@ Automatische Synchronisation bei Pushes auf den Deployment-Branch.
 - [Let’s Encrypt Anleitung](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-22-04)
 
 ---
-
-## Fragen
-- Wie kann man Notifications für Serverausfälle einrichten?
-- Warum erfordert GitHub keine Passwortabfrage?
-
----
-
-## To Do
-- Applikationen hochladen
-- Backups und GitHub Actions testen
-- Serverdokumentation abschließen
+Autor: Zoé Flumini
