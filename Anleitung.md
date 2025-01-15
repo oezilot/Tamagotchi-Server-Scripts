@@ -11,9 +11,9 @@
     - [Ziel](#ziel-1)
     - [Zutaten](#zutaten-1)
     - [Arbeitsschritte](#arbeitsschritte-1)
-      - [1. Bootfähigen USB-Stick erstellen](#1-bootfähigen-usb-stick-erstellen)
-      - [2. Server booten](#2-server-booten)
-      - [3. Betriebssystem installieren](#3-betriebssystem-installieren)
+      - [1. Bootfähiger USB-Stick erstellen](#1-bootfähiger-usb-stick-erstellen)
+      - [2. Betriebsystem booten](#2-betriebsystem-booten)
+      - [3. Betriebssystem Konfiguration](#3-betriebssystem-konfiguration)
   - [Remote SSH-Zugriff einrichten](#remote-ssh-zugriff-einrichten)
     - [Ziel](#ziel-2)
     - [Zutaten](#zutaten-2)
@@ -30,9 +30,11 @@
     - [SSL Zertifikate (HTTPS einrichten)](#ssl-zertifikate-https-einrichten)
   - [Datenbank-Backups](#datenbank-backups)
     - [Ziel](#ziel-4)
+  - [Zutaten](#zutaten-4)
     - [Arbeitsschritte](#arbeitsschritte-4)
-  - [Automatisierte Git-Pull-Action](#automatisierte-git-pull-action)
+  - [Automatisierte Git-Pull-Action und Github-Verbindung](#automatisierte-git-pull-action-und-github-verbindung)
     - [Ziel](#ziel-5)
+    - [Zutaten](#zutaten-5)
     - [Arbeitsschritte](#arbeitsschritte-5)
   - [Debugging](#debugging)
   - [Zusammenfassung](#zusammenfassung)
@@ -56,48 +58,47 @@ Einen Server für die Installation eines Betriebssystems vorbereiten.
 ### Arbeitsschritte
 1. Server-Setup:
    - SSDs einbauen und RAM erweitern.
-  bild
    - Batterie prüfen und bei Bedarf ersetzen (Signalbereich prüfen: grün = gut).
-  bild
+
 
 
 2. Netzwerk-Interfaces identifizieren:
    - Falls der Server mehrere Ethernetnaschlüse besitzt müssen wir wissen welcher Anschluss welchen Namen trägt. Stecke ein Kabel in eines der Ethernetanschlüsse und führe folgenden Command aus:
-   ```bash
-   ip addr show
-   ```
+     ```bash
+     ip addr show
+     ```
    - Nun werden alle aktiven und inaktiven Anschlüsse gezeigt. Ein aktiver Anschluss wird als "UP" angezeigt. Merke dir den Namen des Interfaces für später! (hier: enp9s0)
-   ```bash
-   3: enp9s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
-    link/ether 00:27:13:54:0b:db brd ff:ff:ff:ff:ff:ff
-    inet 195.234.163.110/26 brd 195.234.163.127 scope global enp9s0
-       valid_lft forever preferred_lft forever
-    inet6 fda8:b2ef:f20b:ca46:227:13ff:fe54:bdb/64 scope global dynamic mngtmpaddr noprefixroute 
-       valid_lft 1655sec preferred_lft 1655sec
-    inet6 fe80::227:13ff:fe54:bdb/64 scope link 
-       valid_lft forever preferred_lft forever
-   ```
+     ```bash
+     3: enp9s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+      link/ether 00:27:13:54:0b:db brd ff:ff:ff:ff:ff:ff
+      inet 195.234.163.110/26 brd 195.234.163.127 scope global enp9s0
+         valid_lft forever preferred_lft forever
+      inet6 fda8:b2ef:f20b:ca46:227:13ff:fe54:bdb/64 scope global dynamic mngtmpaddr noprefixroute 
+         valid_lft 1655sec preferred_lft 1655sec
+      inet6 fe80::227:13ff:fe54:bdb/64 scope link 
+         valid_lft forever preferred_lft forever
+     ```
 3. BIOS-Taste identifizieren:
-  - Mit dieser Taste bootet man das Betriebsystem im nächsten Schritt. Je nach Hersteller ist sie unterschiedlich. Finde das Modell des Servers heraus:
-  ```bash
-  sudo dmidecode -t system  
-  ```
-  Finde deine BIOS-Taste(n):
-  ```bash
-  +-------------+-----------------------+
-| Hersteller  | BIOS-Taste(n)        |
-+-------------+-----------------------+
-| ASUS        | F2 oder Del          |
-| Acer        | F2                   |
-| Dell        | F2 oder F12          |
-| HP          | Esc, F10 oder F2     |
-| Lenovo      | F1, F2 oder Fn + F2  |
-| MSI         | Del oder F2          |
-| Gigabyte    | Del oder F2          |
-| Toshiba     | F2 oder Esc          |
-| Samsung     | F2                   |
-+-------------+-----------------------+
-  ```
+   - Mit der BIOS Taste bootet man das Betriebsystem im nächsten Schritt. Je nach Hersteller ist sie unterschiedlich. Finde das Modell des Servers heraus und sein Hersteller:
+     ```bash
+     sudo dmidecode -t system  
+     ```
+   - Finde deine BIOS-Taste(n):
+     ```bash
+     +-------------+-----------------------+
+     | Hersteller  | BIOS-Taste(n)        |
+     +-------------+-----------------------+
+     | ASUS        | F2 oder Del          |
+     | Acer        | F2                   |
+     | Dell        | F2 oder F12          |
+     | HP          | Esc, F10 oder F2     |
+     | Lenovo      | F1, F2 oder Fn + F2  |
+     | MSI         | Del oder F2          |
+     | Gigabyte    | Del oder F2          |
+     | Toshiba     | F2 oder Esc          |
+     | Samsung     | F2                   |
+     +-------------+-----------------------+
+     ```
 
 ---
 
@@ -113,7 +114,7 @@ Ein Betriebssystem installieren und den Server somit bereit für Speicherung und
 - BIOS-Taste und Name des Netzwerkinterface (hier: F1, enp9s0)
 
 ### Arbeitsschritte
-#### 1. Bootfähigen USB-Stick erstellen
+#### 1. Bootfähiger USB-Stick erstellen
 - Lade das gewünschte Betriebssystem (z. B. [Ubuntu Server](https://ubuntu.com/download/server)) auf dem remote-Gerät herunter.
 - Stecke den USB-Stick ein und identifiziere den USB-Stick mit `sudo lsblk`. Aus folgendem Output kann man sehen dass der Stick den Path `/dev/sda` hat mit einer Partition `/dev/sda/sda1`!
   ```bash
@@ -127,7 +128,7 @@ Ein Betriebssystem installieren und den Server somit bereit für Speicherung und
   ```bash
   sudo dd if=/path/to/filename.iso of=/dev/sda bs=4M status=progress oflag=sync
   ```
-#### 2. Server booten
+#### 2. Betriebsystem booten
 - Schließe den bootfähigen USB-Stick an den ausgeschalteten Server an.
 - Starte den Server und drücke sofort wiederholt die BIOS-Taste, um ins BIOS (hier UEFI) zu gelangen.
 - Gehe ins StartUp-Menu, zur Bootreihenfolge. Hier werden alle angeschlossenen Geräte aufgelistet. Das oberste davon hat oberste Priorität und wird beim Bootvorgang gewählt um zu booten!
@@ -136,7 +137,7 @@ Ein Betriebssystem installieren und den Server somit bereit für Speicherung und
 - Save and Exit. Nun bootet das System vom Memory Stick! Wähle try and Install Ubuntu Server
 ![Alt-Text](images/exit.jpg){width=300px}
 
-#### 3. Betriebssystem installieren
+#### 3. Betriebssystem Konfiguration
 - Folge der [Ubuntu Server Installationsanleitung](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview).
 - Hier steht wie man in einer solchen Umgebung sich fortbewegt: 
 1. `Willkommen`: Sprche wählen (ich empfehle English damit man bei Errors gut im Internet Hilfe holen kann!)
@@ -155,22 +156,22 @@ Ein Betriebssystem installieren und den Server somit bereit für Speicherung und
 Jede Disk hat 3 Partitionen die man manuell definiert: SWAP (2GB), / (1.8TB), /boot (2GB). Im 2ten Schritt definiert man das Raid1 (/- und /boot-Partition)
 ![Alt-Text](images/storage1.jpg){width=300px} ![Alt-Text](images/storage2.jpg){width=300px}
 Mit `sudo lsblk` kannst du im nachinein dann die Partitionstabelle ansehen im Terminal, hier ein Beispiel:
-```bash
-sda       8:0    0   1,8T  0 disk  
-├─sda1    8:1    0     1M  0 part  
-├─sda2    8:2    0     2G  0 part  
-│ └─md0   9:0    0     2G  0 raid1 /boot
-├─sda3    8:3    0     2G  0 part  [SWAP]
-└─sda4    8:4    0   1,8T  0 part  
-  └─md1   9:1    0   1,8T  0 raid1 /
-sdb       8:16   0   1,8T  0 disk  
-├─sdb1    8:17   0     1M  0 part  
-├─sdb2    8:18   0     2G  0 part  
-│ └─md0   9:0    0     2G  0 raid1 /boot
-├─sdb3    8:19   0     2G  0 part  [SWAP]
-└─sdb4    8:20   0   1,8T  0 part  
-  └─md1   9:1    0   1,8T  0 raid1 /
-```
+   ```bash
+   sda       8:0    0   1,8T  0 disk  
+   ├─sda1    8:1    0     1M  0 part  
+   ├─sda2    8:2    0     2G  0 part  
+   │ └─md0   9:0    0     2G  0 raid1 /boot
+   ├─sda3    8:3    0     2G  0 part  [SWAP]
+   └─sda4    8:4    0   1,8T  0 part  
+     └─md1   9:1    0   1,8T  0 raid1 /
+   sdb       8:16   0   1,8T  0 disk  
+   ├─sdb1    8:17   0     1M  0 part  
+   ├─sdb2    8:18   0     2G  0 part  
+   │ └─md0   9:0    0     2G  0 raid1 /boot
+   ├─sdb3    8:19   0     2G  0 part  [SWAP]
+   └─sdb4    8:20   0   1,8T  0 part  
+     └─md1   9:1    0   1,8T  0 raid1 /
+   ```
 9. `Userprofil erstellen`: Name, Servername, Username, Passwort erstellen und merken (hier bitte ein starkes Passwort nehmen damit die Daten des Servers geschützt sind, deshalb ist dir zu raten ein 10 bis 15-stelliges Passwort zu generieren und aufzuschrieben!)
 ---
 
@@ -273,9 +274,8 @@ Webseiten auf den Server abspeichern und laden, die über einen Browser zugängl
 Für jede Website braucht es eine nginx-Konfiguration die http(s)-Requests und Responses handled! Je nachdem ob die Website statisch oder dynamisch ist variiert die Konfigurationsdatei ein wenig!
 
 ### Statische Webseiten
-- mehrere statische wbsites teilen sich eine doamin und unterscheiden sich ledigich in ihrem url-parameter
-- nginx hilkt html files und schikt diese an den browser
-- ein beispiel zur gesamten konfiguration wie man es machen kann findest du aif github: https://github.com/oezilot/Tamagotchi-Server-Scripts/blob/master/static_nginx_conf 
+- mehrere statische wbsites teilen sich eine url-adresse und unterscheiden sich ledigich in ihrem url-parameter
+- nginx holt html files und schikt diese an den browser
 
 1. Nginx installieren, service starten, enablen und den Port 80 offen halten.
    ```bash
@@ -370,20 +370,73 @@ Für jede Website braucht es eine nginx-Konfiguration die http(s)-Requests und R
 ### Ziel
 Automatisierte Backups der Datenbank erstellen.
 
+## Zutaten
+- QLite oder deinen datenbankbrowser
+- datenbank-file
+
 ### Arbeitsschritte
-- Installiere SQLite3, um die Datenbank manuell zu testen.
-- Erstelle ein Backup-Skript und richte es als Service ein.
+- Manuelle Datenbank Abfragen
+- Sckript für das kreieren von datenbankfiles wann immer eine änderung gemacht wird an der datenbank
+- skript in den service integrieren 
+
+1. Datenbankbrowser installieren:
+   ```bash
+   sudo apt install sqlite3
+   ```
+2. folgende commands sind wichtig, mit denen kannst du mit deiner datenbank und dem datenbankbrowser herumspielen!
+   1. Datenbakfile mit dem datenbankbrowser öffnen (jetzt befindest du dich im datenbankbrowser drin!)
+   ```bash
+   sqlite3 example.db
+   ```
+   2. tabekllen der datenbank anzeigen:
+   ```bash
+   .tables
+   ```
+   2. daten einer tabelle aus der datenbank anzeigen:
+   ```bash
+   SELECT * FROM table_name;
+   ```
+   2. den datenbankbrowser verlassen:
+   ```bash
+   .exit
+   ```
+3. Das backup script schreiben (am besten legst du es im selben ordner ab wie das app.py der applikation!)
+   1. das script findest du unter in diesem github-repository! der code ist in den commantaren beschrieben im detail! (backup_script)
+   2. was macht das script: es wird eine ordner kreiert wo backups der datenbank reinkommen. sobald irgendeine änderung an der datenbank gemacht wird wird ein neues script erstellt. falls die anzahl scripts 30 erreicht wird immer das älteste gelöscht bei neuzugang! das sorgt dafür dass immmer eine kontante anzahl von 30 scripts existiert!
+   3. das script in den service integrieren damit es immer am laufen ist und es somit auch immer detektieren kann wann eine veränderung an der datenbank vorgenomen wurde!
+    ```bash
+    # folgende zeile musst due im servicefile zu deiner appliaktion ersetzen
+    ExecStart=/bin/bash -c "/home/zvowevan/Projects/Freundschaftsbuch/venv/bin/gunicorn --bind 127.0.0.1:8000 app:app & /usr/bin/python3 /home/zvowevan/Projects/Freundschaftsbuch/backup_script.py"
+    ```
 
 ---
 
-## Automatisierte Git-Pull-Action
+## Automatisierte Git-Pull-Action und Github-Verbindung
 
 ### Ziel
-Automatische Synchronisation bei Pushes auf den Deployment-Branch.
+Das lokale projekt mit github vernetzen und Automatische Synchronisation bei Pushes auf den Deployment-Branch einrichten. So muss man nicht manuell den code verändern gehen wenn man änderungen am code vorgenommen hat! und man kann es remote ohne ssh machen!!!
+
+### Zutaten
+- git
+- github oder gitlab account
 
 ### Arbeitsschritte
-1. Installiere Git und konfiguriere die SSH-Keys.
-2. Erstelle ein GitHub-Workflow-Skript für automatische Pull-Aktionen.
+- git installieren und einrichten.
+- private key hinterlegen auf github
+- github workflow erstellen mit script
+- script für den automatischen pull schreiben
+
+1. git intallieren:
+   ```bash
+   sudo apt install git
+   ```
+2. auf github einloggen und den public key des servers hinterlegen mit einem passenden namen wie z.b. tamagtchi-server. an folgendem ort legt man den key auf github ab: `profilbild -> settings -> SSH and GPG -> add ssh key`
+3. pulle das repo mit dem projekt und erstelle einen neuen branch passend zum server und switche auf diesen branch
+   ```bash
+   git clone ...
+   git checkout -b servername
+   ```
+
 
 ---
 ## Debugging
